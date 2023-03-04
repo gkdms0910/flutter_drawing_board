@@ -1,10 +1,12 @@
 import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:unicons/unicons.dart';
+
 import 'color_pic_btn.dart';
 import 'drawing_controller.dart';
-
 import 'helper/ex_value_builder.dart';
 import 'helper/get_size.dart';
 import 'paint_contents/circle.dart';
@@ -274,16 +276,19 @@ class _DrawingBoardState extends State<DrawingBoard> {
             ),
             ColorPicBtn(controller: _controller),
             IconButton(
-                icon: const Icon(CupertinoIcons.arrow_turn_up_left),
+                icon: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.rotationY(math.pi),
+                    child: const Icon(UniconsLine.redo)),
                 onPressed: () => _controller.undo()),
             IconButton(
-                icon: const Icon(CupertinoIcons.arrow_turn_up_right),
+                icon: const Icon(UniconsLine.redo),
                 onPressed: () => _controller.redo()),
             IconButton(
-                icon: const Icon(CupertinoIcons.rotate_right),
+                icon: const Icon(UniconsLine.corner_up_right),
                 onPressed: () => _controller.turn()),
             IconButton(
-                icon: const Icon(CupertinoIcons.trash),
+                icon: const Icon(UniconsLine.trash_alt),
                 onPressed: () => _controller.clear()),
           ],
         ),
