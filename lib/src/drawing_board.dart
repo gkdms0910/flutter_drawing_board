@@ -9,9 +9,7 @@ import 'color_pic_btn.dart';
 import 'drawing_controller.dart';
 import 'helper/ex_value_builder.dart';
 import 'helper/get_size.dart';
-import 'paint_contents/circle.dart';
 import 'paint_contents/eraser.dart';
-import 'paint_contents/rectangle.dart';
 import 'paint_contents/simple_line.dart';
 import 'paint_contents/smooth_line.dart';
 import 'paint_contents/straight_line.dart';
@@ -111,14 +109,14 @@ class DrawingBoard extends StatefulWidget {
           isActive: currType == StraightLine,
           icon: Icons.show_chart,
           onTap: () => controller.setPaintContent = StraightLine()),
-      DefToolItem(
+      /*DefToolItem(
           isActive: currType == Rectangle,
           icon: CupertinoIcons.stop,
           onTap: () => controller.setPaintContent = Rectangle()),
       DefToolItem(
           isActive: currType == Circle,
           icon: CupertinoIcons.circle,
-          onTap: () => controller.setPaintContent = Circle()),
+          onTap: () => controller.setPaintContent = Circle()),*/
       DefToolItem(
           isActive: currType == Eraser,
           icon: CupertinoIcons.bandage,
@@ -284,9 +282,9 @@ class _DrawingBoardState extends State<DrawingBoard> {
             IconButton(
                 icon: const Icon(UniconsLine.redo),
                 onPressed: () => _controller.redo()),
-            IconButton(
+            /*IconButton(
                 icon: const Icon(UniconsLine.corner_up_right),
-                onPressed: () => _controller.turn()),
+                onPressed: () => _controller.turn()),*/
             IconButton(
                 icon: const Icon(UniconsLine.trash_alt),
                 onPressed: () => _controller.clear()),
