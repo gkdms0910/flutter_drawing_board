@@ -297,7 +297,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
   /// 构建默认工具栏
   Widget get _buildDefaultTools {
     return Material(
-      color: Colors.white,
+      color: const Color.fromARGB(214, 214, 109, 255),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
@@ -329,7 +329,7 @@ class DefToolItem {
     required this.isActive,
     this.onTap,
     this.color,
-    this.activeColor = Colors.blue,
+    this.activeColor = const Color.fromARGB(255, 18, 250, 219),
     this.iconSize,
   });
 
