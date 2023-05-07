@@ -246,6 +246,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
   }
 
   /// 构建默认操作栏
+  ///  작업표시줄
   Widget get _buildDefaultActions {
     return Material(
       color: Colors.white,
@@ -294,7 +295,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
     );
   }
 
-  /// 构建默认工具栏
+  /// 기본 도구
   Widget get _buildDefaultTools {
     return Material(
       color: const Color.fromARGB(214, 214, 109, 255),
@@ -322,7 +323,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
   }
 }
 
-/// 默认工具项配置文件
+/// 기본 도구 설정
 class DefToolItem {
   DefToolItem({
     required this.icon,
