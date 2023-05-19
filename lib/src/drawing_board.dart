@@ -250,7 +250,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
   Widget get _buildDefaultActions {
     return Material(
       borderRadius: BorderRadius.circular(20),
-      color: Colors.white,
+      color: const Color.fromARGB(255, 231, 145, 145),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
