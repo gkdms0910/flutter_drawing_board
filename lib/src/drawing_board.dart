@@ -248,7 +248,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
   /// 构建默认操作栏
   ///  작업표시줄
   Widget get _buildDefaultActions {
-    return Material(
+    return Container(
       color: Colors.white,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
