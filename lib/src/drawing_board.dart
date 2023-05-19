@@ -249,52 +249,48 @@ class _DrawingBoardState extends State<DrawingBoard> {
   ///  작업표시줄
   Widget get _buildDefaultActions {
     return Material(
+      borderRadius: BorderRadius.circular(10),
       color: Colors.white,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: EdgeInsets.zero,
-          child: Row(
-            children: <Widget>[
-              SizedBox(
-                height: 24,
-                width: 160,
-                child: ExValueBuilder<DrawConfig>(
-                  valueListenable: _controller.drawConfig,
-                  shouldRebuild: (DrawConfig p, DrawConfig n) =>
-                      p.strokeWidth != n.strokeWidth,
-                  builder: (_, DrawConfig dc, ___) {
-                    return Slider(
-                      value: dc.strokeWidth,
-                      max: 50,
-                      min: 1,
-                      onChanged: (double v) =>
-                          _controller.setStyle(strokeWidth: v),
-                    );
-                  },
-                ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.zero,
+        child: Row(
+          children: <Widget>[
+            SizedBox(
+              height: 24,
+              width: 160,
+              child: ExValueBuilder<DrawConfig>(
+                valueListenable: _controller.drawConfig,
+                shouldRebuild: (DrawConfig p, DrawConfig n) =>
+                    p.strokeWidth != n.strokeWidth,
+                builder: (_, DrawConfig dc, ___) {
+                  return Slider(
+                    value: dc.strokeWidth,
+                    max: 50,
+                    min: 1,
+                    onChanged: (double v) =>
+                        _controller.setStyle(strokeWidth: v),
+                  );
+                },
               ),
-              ColorPicBtn(controller: _controller),
-              IconButton(
-                  icon: Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.rotationY(math.pi),
-                      child: const Icon(UniconsLine.redo)),
-                  onPressed: () => _controller.undo()),
-              IconButton(
-                  icon: const Icon(UniconsLine.redo),
-                  onPressed: () => _controller.redo()),
-              /*IconButton(
-                  icon: const Icon(UniconsLine.corner_up_right),
-                  onPressed: () => _controller.turn()),*/
-              IconButton(
-                  icon: const Icon(UniconsLine.trash_alt),
-                  onPressed: () => _controller.clear()),
-            ],
-          ),
+            ),
+            ColorPicBtn(controller: _controller),
+            IconButton(
+                icon: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.rotationY(math.pi),
+                    child: const Icon(UniconsLine.redo)),
+                onPressed: () => _controller.undo()),
+            IconButton(
+                icon: const Icon(UniconsLine.redo),
+                onPressed: () => _controller.redo()),
+            /*IconButton(
+                icon: const Icon(UniconsLine.corner_up_right),
+                onPressed: () => _controller.turn()),*/
+            IconButton(
+                icon: const Icon(UniconsLine.trash_alt),
+                onPressed: () => _controller.clear()),
+          ],
         ),
       ),
     );
