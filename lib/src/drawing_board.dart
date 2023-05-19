@@ -249,8 +249,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
   ///  작업표시줄
   Widget get _buildDefaultActions {
     return Material(
-      borderRadius: BorderRadius.circular(20),
-      color: const Color.fromARGB(255, 231, 145, 145),
+      color: Colors.white,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
