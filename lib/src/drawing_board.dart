@@ -298,7 +298,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
   /// 기본 도구
   Widget get _buildDefaultTools {
     return Material(
-      color: const Color.fromARGB(255, 255, 255, 255),
+      color: Colors.white,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
