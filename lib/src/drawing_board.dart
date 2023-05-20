@@ -250,8 +250,11 @@ class _DrawingBoardState extends State<DrawingBoard> {
   Widget get _buildDefaultActions {
     return Material(
       color: Colors.white,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+        ),
         padding: EdgeInsets.zero,
         child: Row(
           children: <Widget>[
