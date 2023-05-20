@@ -250,30 +250,33 @@ class _DrawingBoardState extends State<DrawingBoard> {
   Widget get _buildDefaultActions {
     return Material(
       color: Colors.white,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white,
-        ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
         child: Row(
           children: <Widget>[
-            SizedBox(
-              height: 24,
-              width: 160,
-              child: ExValueBuilder<DrawConfig>(
-                valueListenable: _controller.drawConfig,
-                shouldRebuild: (DrawConfig p, DrawConfig n) =>
-                    p.strokeWidth != n.strokeWidth,
-                builder: (_, DrawConfig dc, ___) {
-                  return Slider(
-                    value: dc.strokeWidth,
-                    max: 50,
-                    min: 1,
-                    onChanged: (double v) =>
-                        _controller.setStyle(strokeWidth: v),
-                  );
-                },
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
+              ),
+              child: SizedBox(
+                height: 24,
+                width: 160,
+                child: ExValueBuilder<DrawConfig>(
+                  valueListenable: _controller.drawConfig,
+                  shouldRebuild: (DrawConfig p, DrawConfig n) =>
+                      p.strokeWidth != n.strokeWidth,
+                  builder: (_, DrawConfig dc, ___) {
+                    return Slider(
+                      value: dc.strokeWidth,
+                      max: 50,
+                      min: 1,
+                      onChanged: (double v) =>
+                          _controller.setStyle(strokeWidth: v),
+                    );
+                  },
+                ),
               ),
             ),
             ColorPicBtn(controller: _controller),
