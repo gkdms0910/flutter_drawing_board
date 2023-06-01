@@ -218,10 +218,10 @@ class _DrawingBoardState extends State<DrawingBoard> {
     );
   }
 
-  /// 构建背景
+  /// background
   Widget get _buildImage => GetSize(
         onChange: (Size? size) => _controller.setBoardSize(size),
-        child: widget.background,
+        child: Center(child: widget.background),
       );
 
   /// 构建绘制层
