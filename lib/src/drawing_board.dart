@@ -37,9 +37,9 @@ class DrawingBoard extends StatefulWidget {
     this.boardClipBehavior = Clip.hardEdge,
     this.panAxis = PanAxis.free,
     this.boardBoundaryMargin,
-    this.boardConstrained = false,
+    this.boardConstrained = true,
     this.maxScale = 20,
-    this.minScale = 0.2,
+    this.minScale = 1,
     this.boardPanEnabled = true,
     this.boardScaleEnabled = true,
     this.boardScaleFactor = 200.0,
@@ -47,7 +47,7 @@ class DrawingBoard extends StatefulWidget {
     this.onInteractionStart,
     this.onInteractionUpdate,
     this.transformationController,
-    this.alignment = Alignment.topCenter,
+    this.alignment = Alignment.bottomCenter,
   }) : super(key: key);
 
   /// 画板背景控件
@@ -156,7 +156,14 @@ class _DrawingBoardState extends State<DrawingBoard> {
       panEnabled: widget.boardPanEnabled,
       scaleEnabled: widget.boardScaleEnabled,
       transformationController: widget.transformationController,
-      child: Align(alignment: widget.alignment, child: _buildBoard),
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: _buildBoard,
+        ),
+      ),
     );
 
     if (widget.showDefaultActions || widget.showDefaultTools) {
@@ -221,10 +228,10 @@ class _DrawingBoardState extends State<DrawingBoard> {
   /// background
   Widget get _buildImage => GetSize(
         onChange: (Size? size) => _controller.setBoardSize(size),
-        child: Center(child: widget.background),
+        child: widget.background,
       );
 
-  /// 构建绘制层
+  /// Make layer
   Widget get _buildPainter {
     return ExValueBuilder<DrawConfig>(
       valueListenable: _controller.drawConfig,
@@ -249,35 +256,28 @@ class _DrawingBoardState extends State<DrawingBoard> {
   ///  작업표시줄
   Widget get _buildDefaultActions {
     return Material(
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(10),
+        bottomRight: Radius.circular(10),
+      ),
       color: Colors.white,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
         child: Row(
           children: <Widget>[
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-              ),
-              child: SizedBox(
-                height: 24,
-                width: 160,
-                child: ExValueBuilder<DrawConfig>(
-                  valueListenable: _controller.drawConfig,
-                  shouldRebuild: (DrawConfig p, DrawConfig n) =>
-                      p.strokeWidth != n.strokeWidth,
-                  builder: (_, DrawConfig dc, ___) {
-                    return Slider(
-                      value: dc.strokeWidth,
-                      max: 50,
-                      min: 1,
-                      onChanged: (double v) =>
-                          _controller.setStyle(strokeWidth: v),
-                    );
-                  },
-                ),
-              ),
+            ExValueBuilder<DrawConfig>(
+              valueListenable: _controller.drawConfig,
+              shouldRebuild: (DrawConfig p, DrawConfig n) =>
+                  p.strokeWidth != n.strokeWidth,
+              builder: (_, DrawConfig dc, ___) {
+                return Slider(
+                  value: dc.strokeWidth,
+                  max: 50,
+                  min: 1,
+                  onChanged: (double v) => _controller.setStyle(strokeWidth: v),
+                );
+              },
             ),
             ColorPicBtn(controller: _controller),
             IconButton(
@@ -304,6 +304,10 @@ class _DrawingBoardState extends State<DrawingBoard> {
   /// 기본 도구
   Widget get _buildDefaultTools {
     return Material(
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(10),
+        bottomRight: Radius.circular(10),
+      ),
       color: Colors.white,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
