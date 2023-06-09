@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:unicons/unicons.dart';
 
 import 'color_pic_btn.dart';
@@ -35,9 +36,9 @@ class DrawingBoard extends StatefulWidget {
     this.clipBehavior = Clip.antiAlias,
     this.defaultToolsBuilder,
     this.boardClipBehavior = Clip.hardEdge,
-    this.panAxis = PanAxis.free,
+    this.panAxis = PanAxis.aligned,
     this.boardBoundaryMargin,
-    this.boardConstrained = true,
+    this.boardConstrained = false,
     this.maxScale = 20,
     this.minScale = 1,
     this.boardPanEnabled = true,
@@ -129,13 +130,63 @@ class DrawingBoard extends StatefulWidget {
   State<DrawingBoard> createState() => _DrawingBoardState();
 }
 
-class _DrawingBoardState extends State<DrawingBoard> {
+class _DrawingBoardState extends State<DrawingBoard>
+    with TickerProviderStateMixin {
   late final DrawingController _controller =
       widget.controller ?? DrawingController();
+  final TransformationController _transformationController =
+      TransformationController();
+  Animation<Matrix4>? _animationReset;
+  late final AnimationController _controllerReset;
+
+  void _onAnimateReset() {
+    _transformationController.value = _animationReset!.value;
+    if (!_controllerReset.isAnimating) {
+      _animationReset!.removeListener(_onAnimateReset);
+      _animationReset = null;
+      _controllerReset.reset();
+    }
+  }
+
+  void _animateResetInitialize() {
+    _controllerReset.reset();
+    _animationReset = Matrix4Tween(
+      begin: _transformationController.value,
+      end: Matrix4.identity(),
+    ).animate(_controllerReset);
+    _animationReset!.addListener(_onAnimateReset);
+    _controllerReset.forward();
+  }
+
+// Stop a running reset to home transform animation.
+  void _animateResetStop() {
+    _controllerReset.stop();
+    _animationReset?.removeListener(_onAnimateReset);
+    _animationReset = null;
+    _controllerReset.reset();
+  }
+
+  void _onInteractionStart(ScaleStartDetails details) {
+    // If the user tries to cause a transformation while the reset animation is
+    // running, cancel the reset animation.
+    if (_controllerReset.status == AnimationStatus.forward) {
+      _animateResetStop();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controllerReset = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+  }
 
   @override
   void dispose() {
     if (widget.controller == null) _controller.dispose();
+    _controllerReset.dispose();
     super.dispose();
   }
 
@@ -149,13 +200,13 @@ class _DrawingBoardState extends State<DrawingBoard> {
       clipBehavior: widget.boardClipBehavior,
       panAxis: widget.panAxis,
       constrained: widget.boardConstrained,
-      onInteractionStart: widget.onInteractionStart,
+      onInteractionStart: _onInteractionStart,
       onInteractionUpdate: widget.onInteractionUpdate,
       onInteractionEnd: widget.onInteractionEnd,
       scaleFactor: widget.boardScaleFactor,
       panEnabled: widget.boardPanEnabled,
       scaleEnabled: widget.boardScaleEnabled,
-      transformationController: widget.transformationController,
+      transformationController: _transformationController,
       child: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -281,20 +332,32 @@ class _DrawingBoardState extends State<DrawingBoard> {
             ),
             ColorPicBtn(controller: _controller),
             IconButton(
-                icon: Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.rotationY(math.pi),
-                    child: const Icon(UniconsLine.redo)),
-                onPressed: () => _controller.undo()),
+              icon: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.rotationY(math.pi),
+                  child: const Icon(UniconsLine.redo)),
+              onPressed: () => _controller.undo(),
+            ),
             IconButton(
-                icon: const Icon(UniconsLine.redo),
-                onPressed: () => _controller.redo()),
+              icon: const Icon(UniconsLine.redo),
+              onPressed: () => _controller.redo(),
+            ),
             /*IconButton(
                 icon: const Icon(UniconsLine.corner_up_right),
                 onPressed: () => _controller.turn()),*/
             IconButton(
-                icon: const Icon(UniconsLine.trash_alt),
-                onPressed: () => _controller.clear()),
+              icon: const Icon(UniconsLine.trash_alt),
+              onPressed: () => _controller.clear(),
+            ),
+            IconButton(
+              onPressed: _animateResetInitialize,
+              tooltip: 'Reset',
+              color: Theme.of(context).colorScheme.surface,
+              icon: const Icon(
+                Icons.replay,
+                color: Colors.black,
+              ),
+            ),
           ],
         ),
       ),
