@@ -12,8 +12,10 @@ dependencies:
     sdk: flutter
 
   unicons: ^2.1.0
+  
   #颜色选择
   flutter_hsvcolor_picker: ^1.2.3
+  animated_toggle_switch: ^0.6.2
 
 dev_dependencies:
   flutter_test:

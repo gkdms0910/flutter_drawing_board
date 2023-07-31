@@ -356,7 +356,7 @@ class DrawingController {
           await boundary.toImage(pixelRatio: ui.window.devicePixelRatio);
       return await image.toByteData(format: ui.ImageByteFormat.png);
     } catch (e) {
-      print('获取图片数据出错:$e');
+      print('error:$e');
       return null;
     }
   }

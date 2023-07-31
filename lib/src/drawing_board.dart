@@ -1,9 +1,9 @@
 import 'dart:math';
 import 'dart:math' as math;
 
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:unicons/unicons.dart';
 
 import 'color_pic_btn.dart';
@@ -28,6 +28,7 @@ class DrawingBoard extends StatefulWidget {
     Key? key,
     required this.background,
     this.controller,
+    this.showDefaultActions1 = false,
     this.showDefaultActions = false,
     this.showDefaultTools = false,
     this.onPointerDown,
@@ -36,7 +37,7 @@ class DrawingBoard extends StatefulWidget {
     this.clipBehavior = Clip.antiAlias,
     this.defaultToolsBuilder,
     this.boardClipBehavior = Clip.hardEdge,
-    this.panAxis = PanAxis.aligned,
+    this.panAxis = PanAxis.free,
     this.boardBoundaryMargin,
     this.boardConstrained = false,
     this.maxScale = 20,
@@ -59,6 +60,8 @@ class DrawingBoard extends StatefulWidget {
 
   /// 显示默认样式的操作栏
   final bool showDefaultActions;
+
+  final bool showDefaultActions1;
 
   /// 显示默认样式的工具栏
   final bool showDefaultTools;
@@ -93,24 +96,30 @@ class DrawingBoard extends StatefulWidget {
   final double boardScaleFactor;
   final TransformationController? transformationController;
   final AlignmentGeometry alignment;
+  //final ValueNotifier<bool> _counter = ValueNotifier<bool>(false);
 
   /// 默认工具项列表
   static List<DefToolItem> defaultTools(
-      Type currType, DrawingController controller) {
-    return <DefToolItem>[
-      DefToolItem(
+          Type currType, DrawingController controller) =>
+      <DefToolItem>[
+        DefToolItem(
           isActive: currType == SimpleLine,
           icon: CupertinoIcons.pencil,
-          onTap: () => controller.setPaintContent = SimpleLine()),
-      DefToolItem(
+          onTap: () {
+            controller.setPaintContent = SimpleLine();
+          },
+        ),
+        DefToolItem(
           isActive: currType == SmoothLine,
           icon: Icons.brush,
-          onTap: () => controller.setPaintContent = SmoothLine()),
-      DefToolItem(
+          onTap: () => controller.setPaintContent = SmoothLine(),
+        ),
+        DefToolItem(
           isActive: currType == StraightLine,
           icon: Icons.show_chart,
-          onTap: () => controller.setPaintContent = StraightLine()),
-      /*DefToolItem(
+          onTap: () => controller.setPaintContent = StraightLine(),
+        ),
+        /*DefToolItem(
           isActive: currType == Rectangle,
           icon: CupertinoIcons.stop,
           onTap: () => controller.setPaintContent = Rectangle()),
@@ -118,26 +127,34 @@ class DrawingBoard extends StatefulWidget {
           isActive: currType == Circle,
           icon: CupertinoIcons.circle,
           onTap: () => controller.setPaintContent = Circle()),*/
-      DefToolItem(
+        DefToolItem(
           isActive: currType == Eraser,
           icon: CupertinoIcons.bandage,
-          onTap: () =>
-              controller.setPaintContent = Eraser(color: Colors.white)),
-    ];
-  }
+          onTap: () => controller.setPaintContent = Eraser(color: Colors.white),
+        ),
+      ];
 
   @override
   State<DrawingBoard> createState() => _DrawingBoardState();
+
+  void setState(Null Function() param0) {}
 }
+
+double screenHeight = 0;
 
 class _DrawingBoardState extends State<DrawingBoard>
     with TickerProviderStateMixin {
   late final DrawingController _controller =
       widget.controller ?? DrawingController();
-  final TransformationController _transformationController =
+  TransformationController _transformationController =
       TransformationController();
   Animation<Matrix4>? _animationReset;
   late final AnimationController _controllerReset;
+  int value = 0;
+  bool positive = false;
+  bool loading = false;
+  bool selected = false;
+  bool visible = false;
 
   void _onAnimateReset() {
     _transformationController.value = _animationReset!.value;
@@ -152,7 +169,7 @@ class _DrawingBoardState extends State<DrawingBoard>
     _controllerReset.reset();
     _animationReset = Matrix4Tween(
       begin: _transformationController.value,
-      end: Matrix4.identity(),
+      end: Matrix4.identity()..translate(0.0, screenHeight * 0.1),
     ).animate(_controllerReset);
     _animationReset!.addListener(_onAnimateReset);
     _controllerReset.forward();
@@ -191,7 +208,13 @@ class _DrawingBoardState extends State<DrawingBoard>
   }
 
   @override
+  void check() {
+    print(selected);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    screenHeight = MediaQuery.of(context).size.height;
     Widget content = InteractiveViewer(
       maxScale: widget.maxScale,
       minScale: widget.minScale,
@@ -206,24 +229,35 @@ class _DrawingBoardState extends State<DrawingBoard>
       scaleFactor: widget.boardScaleFactor,
       panEnabled: widget.boardPanEnabled,
       scaleEnabled: widget.boardScaleEnabled,
-      transformationController: _transformationController,
+      transformationController: _transformationController =
+          TransformationController(
+        Matrix4.identity()..translate(0.0, screenHeight * 0.1),
+      ),
       child: Container(
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: _buildBoard,
-        ),
+        height: MediaQuery.of(context).size.width,
+        child: _buildBoard,
       ),
     );
 
-    if (widget.showDefaultActions || widget.showDefaultTools) {
+    if (widget.showDefaultActions ||
+        widget.showDefaultActions1 ||
+        widget.showDefaultTools) {
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              if (widget.showDefaultActions) _buildDefaultActions2,
+            ],
+          ),
+
           Expanded(child: content),
-          if (widget.showDefaultActions) _buildDefaultActions,
+          if (widget.showDefaultActions1) _buildDefaultActions,
+          //if (widget.showDefaultActions) _buildDefaultActions2,
           if (widget.showDefaultTools) _buildDefaultTools,
+          if (widget.showDefaultActions) _buildDefaultActions3,
         ],
       );
     }
@@ -306,6 +340,96 @@ class _DrawingBoardState extends State<DrawingBoard>
   /// 构建默认操作栏
   ///  작업표시줄
   Widget get _buildDefaultActions {
+    return Visibility(
+      child: Material(
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(10),
+          bottomRight: Radius.circular(10),
+        ),
+        color: Colors.white,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: EdgeInsets.zero,
+          child: Row(
+            children: <Widget>[
+              ExValueBuilder<DrawConfig>(
+                valueListenable: _controller.drawConfig,
+                shouldRebuild: (DrawConfig p, DrawConfig n) =>
+                    p.strokeWidth != n.strokeWidth,
+                builder: (_, DrawConfig dc, ___) {
+                  return Slider(
+                    value: dc.strokeWidth,
+                    max: 50,
+                    min: 1,
+                    onChanged: (double v) =>
+                        _controller.setStyle(strokeWidth: v),
+                  );
+                },
+              ),
+              ColorPicBtn(controller: _controller),
+              /*IconButton(
+                icon: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.rotationY(math.pi),
+                    child: const Icon(UniconsLine.redo)),
+                onPressed: () => _controller.undo(),
+              ),
+              IconButton(
+                icon: const Icon(UniconsLine.redo),
+                onPressed: () => _controller.redo(),
+              ),
+              /*IconButton(
+                  icon: const Icon(UniconsLine.corner_up_right),
+                  onPressed: () => _controller.turn()),*/
+              IconButton(
+                icon: const Icon(UniconsLine.trash_alt),
+                onPressed: () => _controller.clear(),
+              ),*/
+              /*AnimatedToggleSwitch<bool>.dual(
+                current: positive,
+                first: false,
+                second: true,
+                dif: 10.0,
+                borderColor: Colors.transparent,
+                borderWidth: 5.0,
+                height: 30,
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    spreadRadius: 1,
+                    blurRadius: 2,
+                    offset: Offset(0, 1.5),
+                  ),
+                ],
+                onChanged: (bool b) {
+                  setState(() => positive = b);
+                },
+                colorBuilder: (bool b) => b ? Colors.red : Colors.green,
+                iconBuilder: (bool value) => value
+                    ? const Icon(Icons.coronavirus_rounded)
+                    : const Icon(Icons.tag_faces_rounded),
+                textBuilder: (bool value) => value
+                    ? const Center(child: Text('TEST2'))
+                    : const Center(child: Text('TEST1')),
+              ),
+              IconButton(
+                onPressed: _animateResetInitialize,
+                tooltip: 'Reset',
+                color: Theme.of(context).colorScheme.surface,
+                icon: const Icon(
+                  Icons.replay,
+                  color: Colors.black,
+                ),
+              ),*/
+            ],
+          ),
+        ),
+      ),
+      visible: selected,
+    );
+  }
+
+  Widget get _buildDefaultActions2 {
     return Material(
       borderRadius: const BorderRadius.only(
         bottomLeft: Radius.circular(10),
@@ -317,20 +441,6 @@ class _DrawingBoardState extends State<DrawingBoard>
         padding: EdgeInsets.zero,
         child: Row(
           children: <Widget>[
-            ExValueBuilder<DrawConfig>(
-              valueListenable: _controller.drawConfig,
-              shouldRebuild: (DrawConfig p, DrawConfig n) =>
-                  p.strokeWidth != n.strokeWidth,
-              builder: (_, DrawConfig dc, ___) {
-                return Slider(
-                  value: dc.strokeWidth,
-                  max: 50,
-                  min: 1,
-                  onChanged: (double v) => _controller.setStyle(strokeWidth: v),
-                );
-              },
-            ),
-            ColorPicBtn(controller: _controller),
             IconButton(
               icon: Transform(
                   alignment: Alignment.center,
@@ -348,6 +458,51 @@ class _DrawingBoardState extends State<DrawingBoard>
             IconButton(
               icon: const Icon(UniconsLine.trash_alt),
               onPressed: () => _controller.clear(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget get _buildDefaultActions3 {
+    return Material(
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(10),
+        bottomRight: Radius.circular(10),
+      ),
+      color: Colors.white,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.zero,
+        child: Row(
+          children: <Widget>[
+            AnimatedToggleSwitch<bool>.dual(
+              current: positive,
+              first: false,
+              second: true,
+              dif: 10.0,
+              borderColor: Colors.transparent,
+              borderWidth: 5.0,
+              height: 30,
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  spreadRadius: 1,
+                  blurRadius: 2,
+                  offset: Offset(0, 1.5),
+                ),
+              ],
+              onChanged: (bool b) {
+                setState(() => positive = b);
+              },
+              colorBuilder: (bool b) => b ? Colors.red : Colors.green,
+              iconBuilder: (bool value) => value
+                  ? const Icon(Icons.coronavirus_rounded)
+                  : const Icon(Icons.tag_faces_rounded),
+              textBuilder: (bool value) => value
+                  ? const Center(child: Text('TEST2'))
+                  : const Center(child: Text('TEST1')),
             ),
             IconButton(
               onPressed: _animateResetInitialize,
@@ -375,7 +530,43 @@ class _DrawingBoardState extends State<DrawingBoard>
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.zero,
-        child: ExValueBuilder<DrawConfig>(
+        child: Row(
+          children: <Widget>[
+            IconButton(
+              isSelected: selected,
+              icon: const Icon(Icons.abc),
+              selectedIcon: const Icon(
+                Icons.abc,
+                color: Colors.blue,
+              ),
+              onPressed: () {
+                setState(() {
+                  selected = !selected;
+                  check();
+                });
+                _controller.setPaintContent = SimpleLine();
+              },
+            ),
+            IconButton(
+              onPressed: () {
+                _controller.setPaintContent = SmoothLine();
+              },
+              icon: const Icon(Icons.abc),
+            ),
+            IconButton(
+              onPressed: () {
+                _controller.setPaintContent = StraightLine();
+              },
+              icon: const Icon(Icons.abc),
+            ),
+            IconButton(
+              onPressed: () {
+                _controller.setPaintContent = Eraser(color: Colors.white);
+              },
+              icon: const Icon(Icons.abc),
+            ),
+          ],
+        ), /*ExValueBuilder<DrawConfig>(
           valueListenable: _controller.drawConfig,
           shouldRebuild: (DrawConfig p, DrawConfig n) =>
               p.contentType != n.contentType,
@@ -390,14 +581,14 @@ class _DrawingBoardState extends State<DrawingBoard>
                       .toList(),
             );
           },
-        ),
+        ),*/
       ),
     );
   }
 }
 
 /// 기본 도구 설정
-class DefToolItem {
+class DefToolItem extends StatefulWidget {
   DefToolItem({
     required this.icon,
     required this.isActive,
@@ -405,19 +596,25 @@ class DefToolItem {
     this.color,
     this.activeColor = const Color.fromARGB(255, 18, 250, 219),
     this.iconSize,
+    this.setState,
   });
 
   final Function()? onTap;
+  final Function()? setState;
   final bool isActive;
 
   final IconData icon;
   final double? iconSize;
   final Color? color;
   final Color activeColor;
+  final ValueNotifier<bool> _counter = ValueNotifier<bool>(false);
+
+  @override
+  _DefToolItemWidgetState createState() => _DefToolItemWidgetState();
 }
 
 /// 默认工具项 Widget
-class _DefToolItemWidget extends StatelessWidget {
+class _DefToolItemWidget extends StatefulWidget {
   const _DefToolItemWidget({
     Key? key,
     required this.item,
@@ -426,13 +623,19 @@ class _DefToolItemWidget extends StatelessWidget {
   final DefToolItem item;
 
   @override
+  State<_DefToolItemWidget> createState() => _DefToolItemWidgetState();
+}
+
+class _DefToolItemWidgetState extends State<_DefToolItemWidget> {
+  @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: item.onTap,
+      onPressed: widget.item.onTap,
       icon: Icon(
-        item.icon,
-        color: item.isActive ? item.activeColor : item.color,
-        size: item.iconSize,
+        widget.item.icon,
+        color:
+            widget.item.isActive ? widget.item.activeColor : widget.item.color,
+        size: widget.item.iconSize,
       ),
     );
   }
