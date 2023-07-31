@@ -16,6 +16,7 @@ import 'paint_contents/smooth_line.dart';
 import 'paint_contents/straight_line.dart';
 import 'painter.dart';
 
+//icon changing
 /// 默认工具栏构建器
 typedef DefaultToolsBuilder = List<DefToolItem> Function(
   Type currType,
