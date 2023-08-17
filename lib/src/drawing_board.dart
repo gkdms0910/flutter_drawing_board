@@ -97,6 +97,7 @@ class DrawingBoard extends StatefulWidget {
   final double boardScaleFactor;
   final TransformationController? transformationController;
   final AlignmentGeometry alignment;
+
   //final ValueNotifier<bool> _counter = ValueNotifier<bool>(false);
 
   /// 默认工具项列表
@@ -155,7 +156,12 @@ class _DrawingBoardState extends State<DrawingBoard>
   bool positive = false;
   bool loading = false;
   bool selected = false;
-  bool visible = false;
+  int tap1 = 0;
+  int tap2 = 0;
+  int tap3 = 0;
+  int tap4 = 0;
+  Color black = Colors.black;
+  Color blue = Colors.blue;
 
   void _onAnimateReset() {
     _transformationController.value = _animationReset!.value;
@@ -209,11 +215,6 @@ class _DrawingBoardState extends State<DrawingBoard>
   }
 
   @override
-  void check() {
-    print(selected);
-  }
-
-  @override
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
     Widget content = InteractiveViewer(
@@ -253,9 +254,9 @@ class _DrawingBoardState extends State<DrawingBoard>
               if (widget.showDefaultActions) _buildDefaultActions2,
             ],
           ),
-
           Expanded(child: content),
           if (widget.showDefaultActions1) _buildDefaultActions,
+
           //if (widget.showDefaultActions) _buildDefaultActions2,
           if (widget.showDefaultTools) _buildDefaultTools,
           if (widget.showDefaultActions) _buildDefaultActions3,
@@ -340,8 +341,21 @@ class _DrawingBoardState extends State<DrawingBoard>
 
   /// 构建默认操作栏
   ///  작업표시줄
+
   Widget get _buildDefaultActions {
-    return Visibility(
+    double _opacity = 0.0;
+    if (selected == true) {
+      setState(() {
+        _opacity = 1.0;
+      });
+    }
+    if (selected == false) {
+      setState(() {
+        _opacity = 0.0;
+      });
+    }
+    return Opacity(
+      opacity: _opacity,
       child: Material(
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(10),
@@ -426,7 +440,6 @@ class _DrawingBoardState extends State<DrawingBoard>
           ),
         ),
       ),
-      visible: selected,
     );
   }
 
@@ -533,38 +546,41 @@ class _DrawingBoardState extends State<DrawingBoard>
         padding: EdgeInsets.zero,
         child: Row(
           children: <Widget>[
-            IconButton(
+            IconButton.filled(
               isSelected: selected,
-              icon: const Icon(Icons.abc),
+              icon: const Icon(
+                Icons.pentagon,
+              ),
               selectedIcon: const Icon(
                 Icons.abc,
-                color: Colors.blue,
               ),
               onPressed: () {
                 setState(() {
                   selected = !selected;
-                  check();
                 });
                 _controller.setPaintContent = SimpleLine();
               },
             ),
             IconButton(
+              icon: const Icon(Icons.abc),
               onPressed: () {
+                setState(() {});
                 _controller.setPaintContent = SmoothLine();
               },
-              icon: const Icon(Icons.abc),
             ),
             IconButton(
+              icon: const Icon(Icons.abc),
               onPressed: () {
+                setState(() {});
                 _controller.setPaintContent = StraightLine();
               },
-              icon: const Icon(Icons.abc),
             ),
             IconButton(
+              icon: const Icon(Icons.abc),
               onPressed: () {
+                setState(() {});
                 _controller.setPaintContent = Eraser(color: Colors.white);
               },
-              icon: const Icon(Icons.abc),
             ),
           ],
         ), /*ExValueBuilder<DrawConfig>(
@@ -573,7 +589,7 @@ class _DrawingBoardState extends State<DrawingBoard>
               p.contentType != n.contentType,
           builder: (_, DrawConfig dc, ___) {
             final Type currType = dc.contentType;
-
+    
             return Row(
               children:
                   (widget.defaultToolsBuilder?.call(currType, _controller) ??
