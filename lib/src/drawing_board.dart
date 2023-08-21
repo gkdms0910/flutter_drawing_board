@@ -343,19 +343,8 @@ class _DrawingBoardState extends State<DrawingBoard>
   ///  작업표시줄
 
   Widget get _buildDefaultActions {
-    double _opacity = 0.0;
-    if (selected == true) {
-      setState(() {
-        _opacity = 1.0;
-      });
-    }
-    if (selected == false) {
-      setState(() {
-        _opacity = 0.0;
-      });
-    }
-    return Opacity(
-      opacity: _opacity,
+    return Offstage(
+      offstage: selected,
       child: Material(
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(10),
